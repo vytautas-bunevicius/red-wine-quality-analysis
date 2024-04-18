@@ -1,155 +1,158 @@
+from typing import List, NoReturn
+
 import numpy as np
 import pandas as pd
-from scipy import stats
-from sklearn.preprocessing import MinMaxScaler
-from typing import List, NoReturn
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.subplots as sp
+from scipy import stats
+from scipy.stats import pearsonr
 
-color_scheme = ['#dcb0f2', '#f6a5e6', '#ff99d1', '#ff8fb4', '#ff8b91', '#ff8e6b', '#ff9842', '#ffa600']
+# Define a consistent color scheme for visualizations
+PRIMARY_COLORS = ["#5684F7", "#3A5CED", "#7E7AE6"]
+SECONDARY_COLORS = ["#7BC0FF", "#B8CCF4", "#18407F", "#85A2FF", "#C2A9FF", "#3D3270"]
+
+# Combine both color lists for extended options
+ALL_COLORS = PRIMARY_COLORS + SECONDARY_COLORS
 
 
 def get_columns(df: pd.DataFrame) -> List[str]:
     """
-    This function returns a list of column names from a given DataFrame.
+    Returns a list of column names from the DataFrame.
 
     Parameters:
-    df (pandas.DataFrame): The DataFrame from which to extract column names.
+    - df (pd.DataFrame): The DataFrame to extract column names from.
 
     Returns:
-    list: A list containing the names of all columns in the DataFrame.
+    - List[str]: Column names from the DataFrame.
     """
-    return [col for col in df]
+    return df.columns.tolist()
 
 
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     """
-    This function checks for duplicate rows in a DataFrame and removes them.
+    Removes duplicate rows from the DataFrame and prints the number of duplicates found.
 
     Parameters:
-    df (pandas.DataFrame): The DataFrame from which to remove duplicates.
+    - df (pd.DataFrame): The DataFrame to remove duplicates from.
 
     Returns:
-    pandas.DataFrame: The DataFrame after removing duplicates.
+    - pd.DataFrame: DataFrame with duplicates removed.
     """
-    # Check for duplicates
-    duplicates = df.duplicated()
-
-    # If there are duplicates, print the number of duplicates and remove them
-    if duplicates.any():
-        print(f"Number of duplicate rows: {duplicates.sum()}")
-        df = df.drop_duplicates()
-    else:
-        print("No duplicate rows found")
-
-    # Print the number of rows after removing duplicates
-    print(f"Number of rows after removing duplicates: {len(df)}")
-
+    initial_count = len(df)
+    df = df.drop_duplicates()
+    final_count = len(df)
+    print(f"Removed {initial_count - final_count} duplicate rows")
     return df
 
 
-def plot_box_chart(df: pd.DataFrame, x_label: str, y_label: str, chart_title: str) -> None:
+def plot_box_chart(
+    df: pd.DataFrame, x_label: str, y_label: str, chart_title: str
+) -> None:
+    """
+    Creates a box plot for each column in the DataFrame.
+
+    Parameters:
+    - df (pd.DataFrame): DataFrame containing the data.
+    - x_label (str): The label for the x-axis.
+    - y_label (str): The label for the y-axis.
+    - chart_title (str): The title of the chart.
+    """
     fig = go.Figure()
-
     for col in df.columns:
-        fig.add_trace(go.Box(
-            y=df[col],
-            name=col,
-            boxpoints='outliers',
-            marker_color='#18407F',
-            line_color='#5684F7',
-            whiskerwidth=0.2
-        ))
-
-    fig.update_xaxes(title_text=x_label)
-    fig.update_yaxes(title_text=y_label)
-    fig.update_layout(title_text=chart_title, title_x=0.5)
+        fig.add_trace(
+            go.Box(
+                y=df[col],
+                name=col,
+                boxpoints="outliers",
+                marker_color=SECONDARY_COLORS[2],
+                line_color=PRIMARY_COLORS[0],
+            )
+        )
+    fig.update_layout(
+        title=chart_title, xaxis_title=x_label, yaxis_title=y_label, title_x=0.5
+    )
     fig.show()
 
 
 def identify_outliers(df: pd.DataFrame) -> pd.DataFrame:
     """
-    This function identifies the outliers in a DataFrame using the Interquartile Range (IQR) method and returns the count of outliers in each column.
+    Identifies outliers using the IQR method for each numeric column in the DataFrame.
 
     Parameters:
-    df (pandas.DataFrame): The DataFrame in which to find outliers.
+    - df (pd.DataFrame): DataFrame to analyze for outliers.
 
     Returns:
-    pandas.DataFrame: A DataFrame where each cell contains the count of outliers in the corresponding column.
+    - pd.DataFrame: Count of outliers in each column.
     """
-
-    # Calculate the first quartile (Q1) for each column in the DataFrame
     Q1 = df.quantile(0.25)
-
-    # Calculate the third quartile (Q3) for each column in the DataFrame
     Q3 = df.quantile(0.75)
-
-    # Calculate the Interquartile Range (IQR) for each column in the DataFrame
     IQR = Q3 - Q1
-
-    # Determine the lower bound for outliers
     lower_bound = Q1 - 1.5 * IQR
-
-    # Determine the upper bound for outliers
     upper_bound = Q3 + 1.5 * IQR
-
-    # Identify the outliers in the DataFrame
-    outliers = df[(df < lower_bound) | (df > upper_bound)]
-
-    # Count the number of outliers in each column
-    outliers_count = outliers.count()
-
-    return outliers_count
+    outliers = ((df < lower_bound) | (df > upper_bound)).sum()
+    return outliers
 
 
 def plot_histograms(df: pd.DataFrame, features: List[str], nbins: int = 40) -> None:
     """
-    This function plots histograms for the given features of a DataFrame.
+    Plots histograms for specified features in the DataFrame.
 
     Parameters:
-    df (pandas.DataFrame): The DataFrame from which to extract data.
-    features (List[str]): A list of column names for which to plot histograms.
-    nbins (int, optional): The number of bins to use in the histogram. Defaults to 40.
-
-    Returns:
-    None
+    - df (pd.DataFrame): DataFrame to plot.
+    - features (List[str]): List of features to plot histograms for.
+    - nbins (int): Number of bins to use in histograms.
     """
-    color_palette: list[str] = ['#5684F7', '#3A5CED', '#7E7AE6', '#C2A9FF']
+    title = f"Distribution of {', '.join(features)}"
+
     fig = sp.make_subplots(rows=1, cols=len(features))
 
     for i, feature in enumerate(features):
-        hist = go.Histogram(x=df[feature], nbinsx=nbins, name=feature, marker=dict(color=color_palette[i % len(color_palette)], line=dict(color='#000000', width=1)))
-        fig.add_trace(hist, row=1, col=i+1)
-        fig.update_xaxes(title_text=feature, row=1, col=i+1)
+        fig.add_trace(
+            go.Histogram(
+                x=df[feature],
+                nbinsx=nbins,
+                name=feature,
+                marker=dict(
+                    color=ALL_COLORS[i % len(ALL_COLORS)],
+                    line=dict(color="#000000", width=1),
+                ),
+            ),
+            row=1,
+            col=i + 1,
+        )
 
-    fig.update_yaxes(title_text="Count", row=1, col=1)
-    fig.update_layout(height=400, width=800, title_text=f"Distribution of {', '.join(features)}", title_x=0.5, showlegend=False)
+    fig.update_layout(
+        title_text=title, title_x=0.5, showlegend=False  # Centers the title
+    )
+
     fig.show()
 
 
-def plot_heatmap(corr_matrix: pd.DataFrame, colors_matrix: List[str]) -> None:
+def plot_heatmap(corr_matrix: pd.DataFrame) -> None:
     """
-    This function plots a heatmap using the correlation matrix and a color matrix.
+    Plots a heatmap based on a correlation matrix using a specified color scheme.
 
     Parameters:
-    corr_matrix (DataFrame): A correlation matrix.
-    colors_matrix (List[str]): A list of colors for the heatmap.
-
-    Returns:
-    None
+    - corr_matrix (pd.DataFrame): Correlation matrix to plot.
     """
-    color_positions = [i/(len(colors_matrix)-1) for i in range(len(colors_matrix))]
-    color_scale = [[pos, color] for pos, color in zip(color_positions, colors_matrix)]
+    colorscale = [
+        [0.0, SECONDARY_COLORS[5]],  # Dark blue for low correlations
+        [0.2, SECONDARY_COLORS[4]],  # Lighter blue
+        [0.4, PRIMARY_COLORS[2]],  # Light purple
+        [0.6, PRIMARY_COLORS[1]],  # Medium purple
+        [0.8, PRIMARY_COLORS[0]],  # Rich blue
+        [1.0, SECONDARY_COLORS[0]],  # Light blue for high correlations
+    ]
 
-    heatmap = go.Heatmap(
-        x=corr_matrix.columns,
-        y=corr_matrix.columns,
-        z=corr_matrix.values,
-        colorscale=color_scale,
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=corr_matrix.values,
+            x=corr_matrix.columns,
+            y=corr_matrix.columns,
+            colorscale=colorscale,
+        )
     )
-
-    fig = go.Figure(data=heatmap)
 
     fig.update_layout(
         title="Correlation Matrix",
@@ -157,43 +160,77 @@ def plot_heatmap(corr_matrix: pd.DataFrame, colors_matrix: List[str]) -> None:
         yaxis_title="Features",
         title_x=0.5,
     )
-
     fig.show()
 
 
-def plot_top_correlations(df: pd.DataFrame, corr_matrix: pd.DataFrame, top_n: int) -> None:
+def plot_top_correlations(
+    df: pd.DataFrame, corr_matrix: pd.DataFrame, top_n: int
+) -> None:
     """
-    This function plots the top positive and negative correlations in a DataFrame.
+    Plots the top N positive and negative correlations from the correlation matrix.
 
     Parameters:
-    df (pd.DataFrame): The DataFrame to analyze.
-    corr_matrix (pd.DataFrame): The correlation matrix of the DataFrame.
-    top_n (int): The number of top correlations to plot.
+    - df (pd.DataFrame): DataFrame to analyze.
+    - corr_matrix (pd.DataFrame): Correlation matrix of the DataFrame.
+    - top_n (int): Number of top correlations to plot.
+    """
+    correlations = corr_matrix.unstack().reset_index()
+    correlations.columns = ["Feature 1", "Feature 2", "Correlation"]
+    correlations = correlations[correlations["Feature 1"] != correlations["Feature 2"]]
+    top_pos_corr = correlations.nlargest(top_n, "Correlation")
+    top_neg_corr = correlations.nsmallest(top_n, "Correlation")
+
+    for _, row in top_pos_corr.iterrows():
+        fig = px.scatter(
+            df,
+            x=row["Feature 1"],
+            y=row["Feature 2"],
+            trendline="ols",
+            title=f"Positive: {row['Feature 1']} vs {row['Feature 2']}",
+            color_discrete_sequence=[PRIMARY_COLORS[0]],
+        )
+        fig.update_layout(title_x=0.5)
+        fig.show()
+
+    for _, row in top_neg_corr.iterrows():
+        fig = px.scatter(
+            df,
+            x=row["Feature 1"],
+            y=row["Feature 2"],
+            trendline="ols",
+            title=f"Negative: {row['Feature 1']} vs {row['Feature 2']}",
+            color_discrete_sequence=[PRIMARY_COLORS[1]],
+        )
+        fig.update_layout(title_x=0.5)
+        fig.show()
+
+
+def test_correlation(data, var1, var2):
+    """
+    Calculate the Pearson correlation between two variables and test the null hypothesis that the correlation is zero.
+
+    Parameters:
+    data (DataFrame): The dataset containing the variables.
+    var1 (str): The name of the first variable.
+    var2 (str): The name of the second variable.
 
     Returns:
-    None
+    dict: A dictionary containing the correlation, p-value, a boolean indicating whether to reject the null hypothesis,
+    and the 95% confidence interval of the correlation.
     """
-    correlations = corr_matrix.where(~np.tril(np.ones(corr_matrix.shape)).astype(np.bool_))
-    correlations = correlations.stack().reset_index()
-    correlations.columns = ['Feature 1', 'Feature 2', 'Correlation']
-
-    top_pos_corr = correlations.sort_values(by='Correlation', ascending=False).head(top_n)
-    top_neg_corr = correlations.sort_values(by='Correlation').head(top_n)
-
-    for i in range(top_n):
-        fig = px.scatter(df, x=top_pos_corr.iloc[i, 0], y=top_pos_corr.iloc[i, 1],
-                         trendline="ols",
-                         title=f"Positive Correlation: {top_pos_corr.iloc[i, 0]} vs {top_pos_corr.iloc[i, 1]}",
-                         color_discrete_sequence=['#5684F7'],
-                         trendline_color_override="#18407F")
-        fig.update_layout(title_x=0.5)
-        fig.show()
-
-    for i in range(top_n):
-        fig = px.scatter(df, x=top_neg_corr.iloc[i, 0], y=top_neg_corr.iloc[i, 1],
-                         trendline="ols",
-                         title=f"Negative Correlation: {top_neg_corr.iloc[i, 0]} vs {top_neg_corr.iloc[i, 1]}",
-                         color_discrete_sequence=['#3A5CED'],
-                         trendline_color_override="#18407F")
-        fig.update_layout(title_x=0.5)
-        fig.show()
+    correlation, p_value = pearsonr(data[var1], data[var2])
+    alpha = 0.05
+    reject_h0 = p_value < alpha
+    ci_low, ci_high = np.percentile(
+        [
+            correlation - (1.96 * np.sqrt((1 - correlation**2) / (len(data) - 3))),
+            correlation + (1.96 * np.sqrt((1 - correlation**2) / (len(data) - 3))),
+        ],
+        [2.5, 97.5],
+    )  # 95% CI
+    return {
+        "Correlation": correlation,
+        "P-Value": p_value,
+        "Reject H0": reject_h0,
+        "95% CI": (ci_low, ci_high),
+    }

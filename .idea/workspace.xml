@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="37cfee9f-cab8-4696-8924-f2323f7b95ed" name="Changes" comment="" />
+    <list default="true" id="37cfee9f-cab8-4696-8924-f2323f7b95ed" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,6 +23,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "vytautas-bunevicius"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/vytautas-bunevicius/red-wine-quality.git",
+    "accountId": "ca35ca21-c3d0-4c2b-be8c-b52c0c29f470"
+  }
+}]]></component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -86,7 +100,7 @@
       <workItem from="1711983706676" duration="663000" />
       <workItem from="1711984673475" duration="7929000" />
       <workItem from="1712341187834" duration="172000" />
-      <workItem from="1712341380461" duration="2742000" />
+      <workItem from="1712341380461" duration="8291000" />
     </task>
     <servers />
   </component>
