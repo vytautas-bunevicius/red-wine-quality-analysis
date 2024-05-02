@@ -369,6 +369,8 @@ def train_linear_model(data: pd.DataFrame, target_column: str) -> Tuple[OLS, pd.
     return results, X_test, y_test, y_pred
 
 
+import plotly.io as pio
+
 def plot_model_predictions(x_test: pd.DataFrame, y_test: pd.Series, y_pred: pd.Series, title: str, save_path: str = None) -> None:
     """
     Plot the residuals from model predictions with a trendline, using specified color palette.
@@ -407,7 +409,7 @@ def plot_model_predictions(x_test: pd.DataFrame, y_test: pd.Series, y_pred: pd.S
 
     fig.data[1].line.color = trendline_color
 
-    fig.show()
+    fig.show(renderer="kaleido")
     
     if save_path:
-        pio.write_image(fig, save_path)
+        pio.write_image(fig, save_path, format='png')
