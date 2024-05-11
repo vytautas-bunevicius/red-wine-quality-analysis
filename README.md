@@ -12,10 +12,6 @@ Or alternatively, on a [Personal Website](https://bunevicius.com/project-pages/r
 
 To replicate the analysis locally, follow these setup steps:
 
-- Install necessary Python libraries using the command:
-
-      pip install -r requirements.txt
-
 - Clone the Repository:
 
       git clone https://github.com/vytautas-bunevicius/red-wine-quality.git
@@ -23,6 +19,10 @@ To replicate the analysis locally, follow these setup steps:
 - Navigate to the repository directory:
 
       cd red-wine-quality
+
+- Install necessary Python libraries using the command:
+
+      pip install -r requirements.txt
 
 - Launch Jupyter Notebook to interact with the analysis:
 
