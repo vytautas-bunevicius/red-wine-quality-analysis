@@ -18,7 +18,7 @@ To replicate the analysis locally, follow these setup steps:
 
 - Navigate to the repository directory:
 
-      cd red-wine-quality
+      cd red-wine-quality-analysis
 
 - Install necessary Python libraries using the command:
 
