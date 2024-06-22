@@ -14,7 +14,7 @@ To replicate the analysis locally, follow these setup steps:
 
 - Clone the Repository:
 
-      git clone https://github.com/vytautas-bunevicius/red-wine-quality.git
+      git clone https://github.com/vytautas-bunevicius/red-wine-quality-analysis.git
 
 - Navigate to the repository directory:
 
