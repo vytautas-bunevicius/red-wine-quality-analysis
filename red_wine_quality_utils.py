@@ -1,18 +1,38 @@
+"""
+red_wine_quality_utils.py
+
+This module provides utility functions for analyzing the red wine quality dataset.
+It offers data manipulation, visualization, statistical testing, and model evaluation functionalities.
+All functions in this module conform to Google's Python Style Guidelines.
+
+Functions:
+  - get_columns: Retrieve the list of column names from a DataFrame.
+  - remove_duplicates: Remove duplicate rows from a DataFrame.
+  - plot_box_chart: Create box plots for each column in a DataFrame.
+  - identify_outliers: Identify outliers in numeric columns using the IQR method.
+  - plot_histograms: Plot histograms for selected features.
+  - plot_heatmap: Display a heatmap based on a correlation matrix.
+  - test_correlation: Calculate and test the Pearson correlation between two variables.
+  - plot_coefficients: Visualize model coefficients with their confidence intervals.
+  - plot_correlation: Create a scatter plot with a regression line and statistical annotations.
+  - log_transform_features: Apply logarithmic transformation to reduce skewness.
+  - train_linear_model: Train a linear regression model using OLS.
+  - plot_model_predictions: Plot residuals from the model predictions with a trendline.
+"""
+
+from typing import Dict, List, Optional, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from scipy import stats
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.io as pio
+import plotly.subplots as sp
+import statsmodels.api as sm
 from scipy.stats import pearsonr
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from statsmodels.regression.linear_model import OLS
-from typing import Dict, List, Tuple, Union, Optional
-
-import statsmodels.api as sm
-import plotly.express as px
-import plotly.graph_objects as go
-import plotly.subplots as sp
-import plotly.io as pio
 
 PRIMARY_COLORS = ["#5684F7", "#3A5CED", "#7E7AE6", "#C2A9FF"]
 SECONDARY_COLORS = ["#7BC0FF", "#B8CCF4", "#18407F", "#85A2FF", "#3D3270"]
@@ -20,27 +40,28 @@ ALL_COLORS = PRIMARY_COLORS + SECONDARY_COLORS
 
 
 def get_columns(df: pd.DataFrame) -> List[str]:
-    """
-    Returns a list of column names from the DataFrame.
+    """Retrieve column names from the DataFrame.
 
-    Parameters:
-    - df (pd.DataFrame): The DataFrame to extract column names from.
+    Args:
+        df (pd.DataFrame): The DataFrame from which to extract column names.
 
     Returns:
-    - List[str]: Column names from the DataFrame.
+        List[str]: A list containing the column names of the DataFrame.
     """
     return df.columns.tolist()
 
 
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Removes duplicate rows from the DataFrame and prints the number of duplicates found.
+    """Remove duplicate rows from the DataFrame.
 
-    Parameters:
-    - df (pd.DataFrame): The DataFrame to remove duplicates from.
+    This function removes duplicate rows from the provided DataFrame and prints
+    the number of duplicates found.
+
+    Args:
+        df (pd.DataFrame): The DataFrame from which duplicates will be removed.
 
     Returns:
-    - pd.DataFrame: DataFrame with duplicates removed.
+        pd.DataFrame: A DataFrame with duplicate rows removed.
     """
     initial_count = len(df)
     df = df.drop_duplicates()
@@ -54,23 +75,22 @@ def plot_box_chart(
     x_label: str,
     y_label: str,
     chart_title: str,
-    save_path: str = None,
+    save_path: Optional[str] = None,
 ) -> None:
-    """
-    Creates a box plot for each column in the DataFrame and optionally saves it as an image.
+    """Create a box plot for each column in the DataFrame.
 
-    Parameters:
-    - df (pd.DataFrame): DataFrame containing the data.
-    - x_label (str): The label for the x-axis.
-    - y_label (str): The label for the y-axis.
-    - chart_title (str): The title of the chart.
-    - save_path (str, optional): Path to save the plot as an image. If None, the plot is not saved.
+    This function generates a box plot for every column in the DataFrame and displays 
+    the plot using Plotly. Optionally, the plot can be saved as an image file.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data.
+        x_label (str): The label for the x-axis.
+        y_label (str): The label for the y-axis.
+        chart_title (str): The title of the chart.
+        save_path (Optional[str], optional): File path to save the plot image. Defaults to None.
 
     Returns:
-    - None
-
-    Example usage:
-    plot_box_chart(df, "X Label", "Y Label", "Box Chart Title", save_path="plot.png")
+        None
     """
     fig = go.Figure()
     for i, col in enumerate(df.columns):
@@ -93,7 +113,7 @@ def plot_box_chart(
         template="plotly_white",
         height=500,
         width=1600,
-        margin=dict(l=50, r=50, t=80, b=50),  # Adjusted margins for consistency
+        margin=dict(l=50, r=50, t=80, b=50),
     )
     fig.update_xaxes(title_font=dict(size=14))
     fig.update_yaxes(title_font=dict(size=14))
@@ -105,16 +125,18 @@ def plot_box_chart(
 
 
 def identify_outliers(df: pd.DataFrame) -> Dict[str, Union[pd.Series, int]]:
-    """
-    Identifies outliers using the IQR method for each numeric column in the DataFrame and calculates the total count of outliers.
+    """Identify outliers in numeric columns using the IQR method.
 
-    Parameters:
-    - df (pd.DataFrame): DataFrame to analyze for outliers.
+    This function calculates outliers for each numeric column in the DataFrame 
+    and computes both the count of outliers per column and the total count across all columns.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to analyze for outliers.
 
     Returns:
-    - dict: A dictionary containing:
-        - 'outliers_per_column': Count of outliers in each column.
-        - 'total_outliers': Total number of outliers across all columns.
+        Dict[str, Union[pd.Series, int]]: A dictionary with keys:
+            - 'outliers_per_column': Series containing count of outliers per column.
+            - 'total_outliers': Total number of outliers detected across the DataFrame.
     """
     Q1 = df.quantile(0.25)
     Q3 = df.quantile(0.75)
@@ -124,23 +146,27 @@ def identify_outliers(df: pd.DataFrame) -> Dict[str, Union[pd.Series, int]]:
 
     outliers = (df < lower_bound) | (df > upper_bound)
     outliers_count = outliers.sum()
-
     total_outliers = outliers.values.sum()
 
     return {"outliers_per_column": outliers_count, "total_outliers": total_outliers}
 
 
 def plot_histograms(
-    df: pd.DataFrame, features: List[str], nbins: int = 40, save_path: str = None
+    df: pd.DataFrame, features: List[str], nbins: int = 40, save_path: Optional[str] = None
 ) -> None:
-    """
-    Plots histograms for specified features in the DataFrame with the feature names only on the x-axis.
+    """Plot histograms for the specified features in the DataFrame.
 
-    Parameters:
-    - df (pd.DataFrame): DataFrame to plot.
-    - features (List[str]): List of features to plot histograms for.
-    - nbins (int): Number of bins to use in histograms.
-    - save_path (str): Path to save the image file (optional).
+    This function creates histograms for the given features, displaying them side by side.
+    The x-axis of each histogram is labeled with the corresponding feature name.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data.
+        features (List[str]): List of feature names for which to plot histograms.
+        nbins (int, optional): Number of bins for each histogram. Defaults to 40.
+        save_path (Optional[str], optional): File path to save the image. Defaults to None.
+
+    Returns:
+        None
     """
     title = f"Distribution of {', '.join(features)}"
     rows = 1
@@ -155,9 +181,7 @@ def plot_histograms(
                 nbinsx=nbins,
                 name=feature,
                 marker=dict(
-                    color=PRIMARY_COLORS[
-                        i % len(PRIMARY_COLORS)
-                    ],  # Ensure PRIMARY_COLORS is defined or adjust as necessary
+                    color=PRIMARY_COLORS[i % len(PRIMARY_COLORS)],
                     line=dict(color="#000000", width=1),
                 ),
             ),
@@ -175,7 +199,7 @@ def plot_histograms(
         template="plotly_white",
         height=500,
         width=400 * cols,
-        margin=dict(l=50, r=50, t=80, b=50),  # Adjusted top margin for the main title
+        margin=dict(l=50, r=50, t=80, b=50),
     )
 
     fig.show()
@@ -185,15 +209,17 @@ def plot_histograms(
 
 
 def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> None:
-    """
-    Plots a heatmap based on a correlation matrix using a specified color scheme.
+    """Display a heatmap of the provided correlation matrix.
 
-    Parameters:
-    - corr_matrix (pd.DataFrame): Correlation matrix to plot.
-    - save_path (str, optional): Path to save the plot as an image. If None, the plot is not saved.
+    This function creates a heatmap visualization of the correlation matrix using Plotly,
+    applying a custom color scale.
+
+    Args:
+        corr_matrix (pd.DataFrame): The correlation matrix to visualize.
+        save_path (Optional[str], optional): File path to save the image. Defaults to None.
 
     Returns:
-    - None
+        None
     """
     colorscale = [
         [0.0, SECONDARY_COLORS[4]],
@@ -252,28 +278,31 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
 def test_correlation(
     data: pd.DataFrame, var1: str, var2: str
 ) -> Dict[str, Union[float, bool, Tuple[float, float]]]:
-    """
-    Calculate the Pearson correlation between two variables and test the null hypothesis that the correlation is zero.
+    """Calculate and test the Pearson correlation between two variables.
 
-    Parameters:
-    - data (DataFrame): The dataset containing the variables.
-    - var1 (str): The name of the first variable.
-    - var2 (str): The name of the second variable.
+    This function computes the Pearson correlation coefficient between two variables,
+    evaluates the statistical significance, and determines whether to reject the null hypothesis
+    (that the correlation is zero). It also calculates the 95% confidence interval for the correlation.
+
+    Args:
+        data (pd.DataFrame): The DataFrame containing the variables.
+        var1 (str): The name of the first variable.
+        var2 (str): The name of the second variable.
 
     Returns:
-    - dict: A dictionary containing the following keys:
-        - "Correlation" (float): The Pearson correlation coefficient between var1 and var2.
-        - "P-Value" (float): The p-value associated with the correlation coefficient.
-        - "Reject H0" (bool): A boolean indicating whether to reject the null hypothesis.
-        - "95% CI" (tuple): A tuple containing the lower and upper bounds of the 95% confidence interval of the correlation coefficient.
+        Dict[str, Union[float, bool, Tuple[float, float]]]: A dictionary containing:
+            - "Correlation": The Pearson correlation coefficient.
+            - "P-Value": The p-value of the correlation.
+            - "Reject H0": True if the null hypothesis is rejected, else False.
+            - "95% CI": A tuple with the lower and upper bounds of the 95% confidence interval.
     """
     correlation, p_value = pearsonr(data[var1], data[var2])
     alpha = 0.05
     reject_h0 = p_value < alpha
     ci_low, ci_high = np.percentile(
         [
-            correlation - (1.96 * np.sqrt((1 - correlation**2) / (len(data) - 3))),
-            correlation + (1.96 * np.sqrt((1 - correlation**2) / (len(data) - 3))),
+            correlation - (1.96 * np.sqrt((1 - correlation ** 2) / (len(data) - 3))),
+            correlation + (1.96 * np.sqrt((1 - correlation ** 2) / (len(data) - 3))),
         ],
         [2.5, 97.5],
     )
@@ -288,15 +317,17 @@ def test_correlation(
 def plot_coefficients(
     model: OLS, title: str = "Coefficient Estimates and Confidence Intervals"
 ) -> None:
-    """
-    Creates a bar plot of model coefficients and their confidence intervals using predefined color codes.
+    """Visualize model coefficients and their confidence intervals.
 
-    Parameters:
-    - model (statsmodels OLS model): The fitted model object.
-    - title (str): Title of the plot.
+    This function creates a bar plot of the coefficients from a fitted OLS model,
+    complete with their corresponding confidence intervals.
+
+    Args:
+        model (OLS): The fitted statsmodels OLS model.
+        title (str, optional): The title of the plot. Defaults to "Coefficient Estimates and Confidence Intervals".
 
     Returns:
-    - None
+        None
     """
     coefficients = model.params
     conf_int = model.conf_int()
@@ -318,19 +349,22 @@ def plot_coefficients(
 def plot_correlation(
     data: pd.DataFrame, var1: str, var2: str, save_path: Optional[str] = None
 ) -> go.Figure:
-    """
-    Visualize the Pearson correlation between two variables using Plotly, with improved annotation placement and specified trendline color.
+    """Visualize the correlation between two variables with a regression line.
 
-    Parameters:
-    - data (pd.DataFrame): The dataset containing the variables.
-    - var1 (str): The name of the first variable.
-    - var2 (str): The name of the second variable.
-    - save_path (str, optional): The file path to save the plot as a PNG image.
+    This function creates a scatter plot of two variables from the DataFrame,
+    fits a linear regression model, and annotates the plot with statistical details
+    including Pearson correlation, p-value, 95% confidence interval, and the line equation.
+
+    Args:
+        data (pd.DataFrame): The DataFrame containing the data.
+        var1 (str): The name of the first variable.
+        var2 (str): The name of the second variable.
+        save_path (Optional[str], optional): File path to save the plot image. Defaults to None.
 
     Returns:
-    - go.Figure: A Plotly figure object with the scatter plot, regression line, and improved annotations.
+        go.Figure: The Plotly figure object containing the scatter plot and regression line.
     """
-    stats = test_correlation(data, var1, var2)
+    stats_dict = test_correlation(data, var1, var2)
 
     fig = px.scatter(
         data,
@@ -353,8 +387,8 @@ def plot_correlation(
             x=[None],
             y=[None],
             text=[
-                f"Correlation: {stats['Correlation']:.3f}<br>P-value: {stats['P-Value']:.3g}<br>"
-                f"95% CI: [{stats['95% CI'][0]:.3f}, {stats['95% CI'][1]:.3f}]<br>"
+                f"Correlation: {stats_dict['Correlation']:.3f}<br>P-value: {stats_dict['P-Value']:.3g}<br>"
+                f"95% CI: [{stats_dict['95% CI'][0]:.3f}, {stats_dict['95% CI'][1]:.3f}]<br>"
                 f"Line Equation: y = {slope:.3f}x + {intercept:.3f}"
             ],
             mode="text",
@@ -376,12 +410,12 @@ def plot_correlation(
         xaxis_title_font=dict(size=14),
         yaxis_title_font=dict(size=14),
         template="plotly_white",
-        margin=dict(l=50, r=50, t=80, b=50),  # Adjusted margins for consistency
+        margin=dict(l=50, r=50, t=80, b=50),
         annotations=[
             {
-                "text": f"Statistical Details:<br>Correlation: {stats['Correlation']:.3f}<br>P-value: {stats['P-Value']:.3g}<br>"
-                f"95% CI: [{stats['95% CI'][0]:.3f}, {stats['95% CI'][1]:.3f}]<br>"
-                f"Line Equation: y = {slope:.3f}x + {intercept:.3f}",
+                "text": f"Statistical Details:<br>Correlation: {stats_dict['Correlation']:.3f}<br>P-value: {stats_dict['P-Value']:.3g}<br>"
+                        f"95% CI: [{stats_dict['95% CI'][0]:.3f}, {stats_dict['95% CI'][1]:.3f}]<br>"
+                        f"Line Equation: y = {slope:.3f}x + {intercept:.3f}",
                 "align": "left",
                 "showarrow": False,
                 "xref": "paper",
@@ -399,18 +433,22 @@ def plot_correlation(
     fig.show()
     if save_path:
         fig.write_image(save_path)
+    return fig
 
 
 def log_transform_features(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-    """
-    Apply log transformation to specified columns in a DataFrame to reduce skewness.
+    """Apply logarithmic transformation to specified columns to reduce skewness.
 
-    Parameters:
-    - df (pd.DataFrame): The input DataFrame containing the data.
-    - columns (List[str]): List of column names to apply the log transformation.
+    This function applies a logarithmic transformation (using log1p) to the given columns 
+    in the DataFrame. If a column contains non-positive values, a small positive offset is added 
+    to enable the logarithmic transformation.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data.
+        columns (List[str]): A list of column names to transform.
 
     Returns:
-    - pd.DataFrame: A DataFrame with the log-transformed values in the specified columns.
+        pd.DataFrame: A new DataFrame with the specified columns log-transformed.
     """
     transformed_df = df.copy()
 
@@ -427,20 +465,24 @@ def log_transform_features(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame
 def train_linear_model(
     data: pd.DataFrame, target_column: str
 ) -> Tuple[OLS, pd.DataFrame, pd.Series, np.ndarray]:
-    """
-    Trains a linear regression model using the given data and target column.
+    """Train a linear regression model using Ordinary Least Squares (OLS).
 
-    Parameters:
-    - data (pd.DataFrame): The input data containing the features and target column.
-    - target_column (str): The name of the target column in the data.
+    This function splits the data into training and testing sets, adds a constant term
+    to the features, and fits an OLS model on the training data. It then predicts values 
+    on the test set and prints model evaluation metrics such as Mean Squared Error and 
+    R-squared.
+
+    Args:
+        data (pd.DataFrame): The input DataFrame containing features and the target column.
+        target_column (str): The name of the target column.
 
     Returns:
-    - results (statsmodels.regression.linear_model.RegressionResultsWrapper): The trained model results.
-    - X_test (pd.DataFrame): The test features.
-    - y_test (pd.Series): The test target values.
-    - y_pred (np.ndarray): The predicted target values for the test features.
+        Tuple[OLS, pd.DataFrame, pd.Series, np.ndarray]: A tuple containing:
+            - The fitted OLS model.
+            - The test features (X_test).
+            - The test target values (y_test).
+            - The predicted target values for the test features (y_pred).
     """
-
     X = data.drop(target_column, axis=1)
     y = data[target_column]
 
@@ -474,23 +516,23 @@ def plot_model_predictions(
     title: str,
     save_path: Optional[str] = None,
 ) -> None:
-    """
-    Plot the residuals from model predictions with a trendline, using specified color palette.
+    """Plot residuals from model predictions.
 
-    Parameters:
-    - x_test (pd.DataFrame): The input DataFrame containing the test data.
-    - y_test (pd.Series): The actual target values.
-    - y_pred (pd.Series): The predicted target values.
-    - title (str): The title of the plot.
-    - save_path (str, optional): The file path to save the plot as a PNG image.
+    This function creates a scatter plot of the residuals (difference between actual and predicted values)
+    with an overlaid trendline. It is useful for visualizing the performance of a regression model.
+
+    Args:
+        x_test (pd.DataFrame): The test features.
+        y_test (pd.Series): The actual target values.
+        y_pred (pd.Series): The predicted target values.
+        title (str): The title for the plot.
+        save_path (Optional[str], optional): File path to save the plot image. Defaults to None.
 
     Returns:
-    - None
+        None
     """
     residuals = y_test - y_pred
-    results_df = pd.DataFrame(
-        {"Predicted": y_pred, "Residuals": residuals}
-    ).reset_index(drop=True)
+    results_df = pd.DataFrame({"Predicted": y_pred, "Residuals": residuals}).reset_index(drop=True)
 
     fig = px.scatter(
         results_df,
@@ -526,7 +568,7 @@ def plot_model_predictions(
         showlegend=False,
         height=500,
         width=1600,
-        margin=dict(l=50, r=50, t=80, b=50),  # Adjusted margins for consistency
+        margin=dict(l=50, r=50, t=80, b=50),
     )
 
     fig.data[1].line.color = trendline_color
