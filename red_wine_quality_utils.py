@@ -33,9 +33,68 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from statsmodels.regression.linear_model import OLS
 
-PRIMARY_COLORS = ["#5684F7", "#3A5CED", "#7E7AE6", "#C2A9FF"]
-SECONDARY_COLORS = ["#7BC0FF", "#B8CCF4", "#18407F", "#85A2FF", "#3D3270"]
-ALL_COLORS = PRIMARY_COLORS + SECONDARY_COLORS
+# Primary brand colors from brandbook
+PRIMARY_BLUE = "#3A5CED"
+SECONDARY_BLUE = "#7E7AE6"
+LIGHT_BLUE = "#7BC0FF"
+SOFT_BLUE = "#B8CCF4"
+DARK_BLUE = "#18407F"
+SKY_BLUE = "#85A2FF"
+LAVENDER = "#C2A9FF"
+DEEP_PURPLE = "#3D3270"
+AQUA = "#82E5E8"
+OCEAN_BLUE = "#1C8BA5"
+SOFT_AQUA = "#C0E0E2"
+
+# Technical colors from brandbook
+WHITE = "#FFFFFF"
+BLACK = "#000000"
+GRAY_LIGHT = "#E5E8EF"
+TEXT_DARK = "#1A1E21"
+TEXT_MID = "#48494C"
+ALERT_RED = "#D30B3B"
+HIGHLIGHT_BLUE = "#5684F7"
+BACKGROUND_TRANSPARENT = "rgba(255, 255, 255, 0.9)"
+
+# Typography specifications from brandbook
+FONT_FAMILY = "Gordita, Figtree, sans-serif"
+FONT_SIZE_TITLE = 24
+FONT_SIZE_SUBTITLE = 20
+FONT_SIZE_AXIS = 16
+FONT_SIZE_TICK = 14
+FONT_SIZE_LEGEND = 14
+CORNER_RADIUS = 4
+
+# Default plot dimensions
+PLOT_HEIGHT = 600
+PLOT_WIDTH_PER_SUBPLOT = 400
+PLOT_MARGINS = {"l": 60, "r": 150, "t": 100, "b": 80, "pad": 10}
+
+# Base plot layout configuration
+BASE_LAYOUT = {
+    "paper_bgcolor": WHITE,
+    "plot_bgcolor": WHITE,
+    "font": {
+        "family": FONT_FAMILY,
+        "color": TEXT_DARK,
+        "size": FONT_SIZE_AXIS,
+    },
+    "xaxis": {
+        "gridcolor": GRAY_LIGHT,
+        "linecolor": GRAY_LIGHT,
+        "zerolinecolor": GRAY_LIGHT,
+        "showline": True,
+        "linewidth": 1,
+    },
+    "yaxis": {
+        "gridcolor": GRAY_LIGHT,
+        "linecolor": GRAY_LIGHT,
+        "zerolinecolor": GRAY_LIGHT,
+        "showline": True,
+        "linewidth": 1,
+    },
+}
+
 
 
 def get_columns(df: pd.DataFrame) -> List[str]:
@@ -98,24 +157,29 @@ def plot_box_chart(
                 y=df[col],
                 name=col,
                 boxpoints="outliers",
-                marker_color=PRIMARY_COLORS[i % len(PRIMARY_COLORS)],
-                line_color=SECONDARY_COLORS[0],
+                fillcolor=PRIMARY_BLUE,  # main box color set to blue
+                marker=dict(color=LAVENDER),  # outlier markers set to lavender
+                line=dict(color=PRIMARY_BLUE),  # border color set to blue
             )
         )
-    fig.update_layout(
-        title=chart_title,
-        xaxis_title=x_label,
-        yaxis_title=y_label,
-        title_x=0.5,
-        title_font=dict(size=20),
-        showlegend=False,
-        template="plotly_white",
-        height=500,
-        width=1600,
-        margin=dict(l=50, r=50, t=80, b=50),
-    )
-    fig.update_xaxes(title_font=dict(size=14))
-    fig.update_yaxes(title_font=dict(size=14))
+    # Remove xaxis and yaxis settings from BASE_LAYOUT to avoid duplicate keyword issues
+    base_layout = dict(BASE_LAYOUT)
+    base_layout.pop("xaxis", None)
+    base_layout.pop("yaxis", None)
+    base_layout.update({
+        "title": chart_title,
+        "xaxis_title": x_label,
+        "yaxis_title": y_label,
+        "title_x": 0.5,
+        "title_font": dict(family=FONT_FAMILY, size=FONT_SIZE_TITLE, color=TEXT_DARK),
+        "showlegend": False,
+        "height": 500,
+        "width": 1600,
+        "margin": dict(l=50, r=50, t=80, b=50),
+    })
+    fig.layout.update(base_layout)
+    fig.update_xaxes(title_font=dict(family=FONT_FAMILY, size=FONT_SIZE_SUBTITLE, color=TEXT_DARK))
+    fig.update_yaxes(title_font=dict(family=FONT_FAMILY, size=FONT_SIZE_SUBTITLE, color=TEXT_DARK))
 
     if save_path:
         fig.write_image(save_path)
@@ -179,7 +243,7 @@ def plot_histograms(
                 nbinsx=nbins,
                 name=feature,
                 marker=dict(
-                    color=PRIMARY_COLORS[i % len(PRIMARY_COLORS)],
+                    color=([PRIMARY_BLUE, SECONDARY_BLUE, LAVENDER])[i % 3],
                     line=dict(color="#000000", width=1),
                 ),
             ),
@@ -190,11 +254,11 @@ def plot_histograms(
         fig.update_yaxes(title_text="Count", row=1, col=i + 1, title_font=dict(size=14))
 
     fig.update_layout(
+        **BASE_LAYOUT,
         title_text=title,
         title_x=0.5,
-        title_font=dict(size=20),
+        title_font=dict(family=FONT_FAMILY, size=FONT_SIZE_TITLE, color=TEXT_DARK),
         showlegend=False,
-        template="plotly_white",
         height=500,
         width=400 * cols,
         margin=dict(l=50, r=50, t=80, b=50),
@@ -219,12 +283,9 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
         go.Figure: The Plotly figure object containing the heatmap.
     """
     colorscale = [
-        [0.0, SECONDARY_COLORS[4]],
-        [0.2, SECONDARY_COLORS[3]],
-        [0.4, PRIMARY_COLORS[2]],
-        [0.6, PRIMARY_COLORS[1]],
-        [0.8, PRIMARY_COLORS[0]],
-        [1.0, SECONDARY_COLORS[0]],
+        [0.0, PRIMARY_BLUE],
+        [0.5, LAVENDER],
+        [1.0, SECONDARY_BLUE],
     ]
 
     fig = go.Figure(
@@ -234,32 +295,49 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
             y=corr_matrix.columns,
             colorscale=colorscale,
             colorbar=dict(
-                title={'text': 'Correlation', 'font': {'family': 'Arial, sans-serif', 'size': 12}}
+                title={'text': 'Correlation', 'font': {'family': FONT_FAMILY, 'size': FONT_SIZE_AXIS, 'color': TEXT_DARK}},
+                tickfont={'family': FONT_FAMILY, 'size': FONT_SIZE_TICK, 'color': TEXT_DARK}
             ),
         )
     )
 
-    fig.update_layout(
-        title=dict(
-            text="Correlation Matrix",
-            x=0.5,
-            xanchor="center",
-            font=dict(size=20, family="Arial, sans-serif"),
-        ),
-        xaxis={
-            'title': {'text': 'Features', 'font': {'size': 14, 'family': 'Arial, sans-serif'}},
-            'tickfont': {'size': 12, 'family': 'Arial, sans-serif'},
+    # Remove xaxis and yaxis settings from BASE_LAYOUT to avoid duplicate keyword issues
+    base_layout = dict(BASE_LAYOUT)
+    base_layout.pop("xaxis", None)
+    base_layout.pop("yaxis", None)
+    base_layout.update({
+        "title": {
+            "text": "Correlation Matrix",
+            "x": 0.5,
+            "xanchor": "center",
+            "font": {"family": FONT_FAMILY, "size": FONT_SIZE_TITLE, "color": TEXT_DARK},
+        },
+        "xaxis": {
+            'title': {'text': 'Features', 'font': {'family': FONT_FAMILY, 'size': FONT_SIZE_AXIS, 'color': TEXT_DARK}},
+            'tickfont': {'family': FONT_FAMILY, 'size': FONT_SIZE_AXIS, 'color': TEXT_DARK},
             'tickangle': 45,
         },
-        yaxis={
-            'title': {'text': 'Features', 'font': {'size': 14, 'family': 'Arial, sans-serif'}},
-            'tickfont': {'size': 12, 'family': 'Arial, sans-serif'},
+        "yaxis": {
+            'title': {'text': 'Features', 'font': {'family': FONT_FAMILY, 'size': FONT_SIZE_AXIS, 'color': TEXT_DARK}},
+            'tickfont': {'family': FONT_FAMILY, 'size': FONT_SIZE_AXIS, 'color': TEXT_DARK},
         },
-        template="plotly_white",
-        height=500,
-        width=1600,
-        margin=dict(l=100, r=100, t=100, b=100),
-    )
+        "height": 500,
+        "width": 1600,
+        "margin": {"l": 100, "r": 100, "t": 100, "b": 100},
+    })
+    fig.layout.update(base_layout)
+
+    # Add correlation annotations to each cell for improved readability
+    for i, row in enumerate(corr_matrix.values):
+        for j, val in enumerate(row):
+            fig.add_annotation(
+                x=corr_matrix.columns[j],
+                y=corr_matrix.index[i],
+                text=str(round(val, 2)),
+                showarrow=False,
+                font=dict(family=FONT_FAMILY, size=FONT_SIZE_TICK, color=TEXT_DARK),
+                xref="x", yref="y"
+            )
 
     if save_path:
         fig.write_image(save_path)
@@ -332,7 +410,12 @@ def plot_coefficients(
         error_y="Upper CI",
         error_y_minus="Lower CI",
         title=title,
-        color_discrete_sequence=[PRIMARY_COLORS[1]],
+        color_discrete_sequence=[SECONDARY_BLUE],
+    )
+    fig.update_layout(
+        **BASE_LAYOUT,
+        title_font=dict(family=FONT_FAMILY, size=FONT_SIZE_TITLE, color=TEXT_DARK),
+        margin=dict(l=50, r=50, t=80, b=50),
     )
 
     return fig
@@ -365,14 +448,14 @@ def plot_correlation(
         trendline="ols",
         labels={var1: var1, var2: var2},
         title=f"Scatter Plot of {var1} vs {var2}",
-        color_discrete_sequence=[SECONDARY_COLORS[0]],
+        color_discrete_sequence=[PRIMARY_BLUE],
     )
 
     results = px.get_trendline_results(fig)
     slope = results.iloc[0]["px_fit_results"].params[1]
     intercept = results.iloc[0]["px_fit_results"].params[0]
 
-    fig.data[-1].line.color = SECONDARY_COLORS[4]
+    fig.data[-1].line.color = SECONDARY_BLUE
 
     fig.add_trace(
         go.Scatter(
@@ -391,18 +474,20 @@ def plot_correlation(
     )
 
     fig.update_layout(
+        **BASE_LAYOUT,
         title={
             "text": f"Scatter Plot of {var1} vs {var2}",
             "x": 0.5,
             "xanchor": "center",
-            "font": {"size": 20},
+            "font": {"family": FONT_FAMILY, "size": FONT_SIZE_TITLE, "color": TEXT_DARK},
         },
         xaxis_title=var1,
         yaxis_title=var2,
-        xaxis_title_font=dict(size=14),
-        yaxis_title_font=dict(size=14),
-        template="plotly_white",
+        xaxis_title_font=dict(family=FONT_FAMILY, size=FONT_SIZE_AXIS, color=TEXT_DARK),
+        yaxis_title_font=dict(family=FONT_FAMILY, size=FONT_SIZE_AXIS, color=TEXT_DARK),
         margin=dict(l=50, r=50, t=80, b=50),
+        height=500,
+        width=1600,
         annotations=[
             {
                 "text": f"Statistical Details:<br>Correlation: {stats_dict['Correlation']:.3f}<br>P-value: {stats_dict['P-Value']:.3g}<br>"
@@ -418,8 +503,6 @@ def plot_correlation(
                 "borderwidth": 1,
             }
         ],
-        height=500,
-        width=1600,
     )
 
     if save_path:
@@ -534,31 +617,31 @@ def plot_model_predictions(
         trendline="ols",
     )
 
-    marker_color = SECONDARY_COLORS[0]
-    trendline_color = SECONDARY_COLORS[4]
+    marker_color = PRIMARY_BLUE
+    trendline_color = SECONDARY_BLUE
 
     fig.update_traces(marker=dict(color=marker_color))
-    fig.update_layout(
-        title={
+
+    # Update layout by merging BASE_LAYOUT without xaxis and yaxis keys to avoid conflicts
+    base_layout = dict(BASE_LAYOUT)
+    base_layout.pop("xaxis", None)
+    base_layout.pop("yaxis", None)
+    base_layout.update({
+        "title": {
             "text": title,
             "x": 0.5,
             "xanchor": "center",
-            "font": {"size": 20, "family": "Arial, sans-serif"},
+            "font": {"family": FONT_FAMILY, "size": FONT_SIZE_TITLE, "color": TEXT_DARK},
         },
-        plot_bgcolor="white",
-        xaxis={
-            'title': { 'text': 'Predicted Values', 'font': {'family': 'Arial, sans-serif', 'size': 14} },
-            'tickfont': {'family': 'Arial, sans-serif', 'size': 12},
-        },
-        yaxis={
-            'title': {'text': 'Residuals', 'font': {'family': 'Arial, sans-serif', 'size': 14}},
-            'tickfont': {'family': 'Arial, sans-serif', 'size': 12}
-        },
-        showlegend=False,
-        height=500,
-        width=1600,
-        margin=dict(l=50, r=50, t=80, b=50),
-    )
+        "xaxis_title": "Predicted Values",
+        "yaxis_title": "Residuals",
+        "xaxis_title_font": dict(family=FONT_FAMILY, size=FONT_SIZE_AXIS, color=TEXT_DARK),
+        "yaxis_title_font": dict(family=FONT_FAMILY, size=FONT_SIZE_AXIS, color=TEXT_DARK),
+        "margin": {"l": 50, "r": 50, "t": 80, "b": 50},
+        "height": 500,
+        "width": 1600,
+    })
+    fig.layout.update(base_layout)
 
     fig.data[1].line.color = trendline_color
 
