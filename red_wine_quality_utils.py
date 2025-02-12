@@ -26,7 +26,6 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import plotly.io as pio
 import plotly.subplots as sp
 import statsmodels.api as sm
 from scipy.stats import pearsonr
@@ -76,7 +75,7 @@ def plot_box_chart(
     y_label: str,
     chart_title: str,
     save_path: Optional[str] = None,
-) -> None:
+) -> go.Figure:
     """Create a box plot for each column in the DataFrame.
 
     This function generates a box plot for every column in the DataFrame and displays 
@@ -90,7 +89,7 @@ def plot_box_chart(
         save_path (Optional[str], optional): File path to save the plot image. Defaults to None.
 
     Returns:
-        None
+        go.Figure: The Plotly figure object containing the box plots.
     """
     fig = go.Figure()
     for i, col in enumerate(df.columns):
@@ -118,10 +117,9 @@ def plot_box_chart(
     fig.update_xaxes(title_font=dict(size=14))
     fig.update_yaxes(title_font=dict(size=14))
 
-    fig.show()
-
     if save_path:
         fig.write_image(save_path)
+    return fig
 
 
 def identify_outliers(df: pd.DataFrame) -> Dict[str, Union[pd.Series, int]]:
@@ -153,7 +151,7 @@ def identify_outliers(df: pd.DataFrame) -> Dict[str, Union[pd.Series, int]]:
 
 def plot_histograms(
     df: pd.DataFrame, features: List[str], nbins: int = 40, save_path: Optional[str] = None
-) -> None:
+) -> go.Figure:
     """Plot histograms for the specified features in the DataFrame.
 
     This function creates histograms for the given features, displaying them side by side.
@@ -166,7 +164,7 @@ def plot_histograms(
         save_path (Optional[str], optional): File path to save the image. Defaults to None.
 
     Returns:
-        None
+        go.Figure: The Plotly figure object containing the histograms.
     """
     title = f"Distribution of {', '.join(features)}"
     rows = 1
@@ -202,13 +200,12 @@ def plot_histograms(
         margin=dict(l=50, r=50, t=80, b=50),
     )
 
-    fig.show()
-
     if save_path:
         fig.write_image(save_path)
+    return fig
 
 
-def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> None:
+def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> go.Figure:
     """Display a heatmap of the provided correlation matrix.
 
     This function creates a heatmap visualization of the correlation matrix using Plotly,
@@ -219,7 +216,7 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
         save_path (Optional[str], optional): File path to save the image. Defaults to None.
 
     Returns:
-        None
+        go.Figure: The Plotly figure object containing the heatmap.
     """
     colorscale = [
         [0.0, SECONDARY_COLORS[4]],
@@ -237,10 +234,7 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
             y=corr_matrix.columns,
             colorscale=colorscale,
             colorbar=dict(
-                title="Correlation",
-                titleside="right",
-                titlefont=dict(size=14, family="Arial, sans-serif"),
-                tickfont=dict(size=12, family="Arial, sans-serif"),
+                title={'text': 'Correlation', 'font': {'family': 'Arial, sans-serif', 'size': 12}}
             ),
         )
     )
@@ -252,27 +246,24 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
             xanchor="center",
             font=dict(size=20, family="Arial, sans-serif"),
         ),
-        xaxis=dict(
-            title="Features",
-            titlefont=dict(size=14, family="Arial, sans-serif"),
-            tickfont=dict(size=12, family="Arial, sans-serif"),
-            tickangle=45,
-        ),
-        yaxis=dict(
-            title="Features",
-            titlefont=dict(size=14, family="Arial, sans-serif"),
-            tickfont=dict(size=12, family="Arial, sans-serif"),
-        ),
+        xaxis={
+            'title': {'text': 'Features', 'font': {'size': 14, 'family': 'Arial, sans-serif'}},
+            'tickfont': {'size': 12, 'family': 'Arial, sans-serif'},
+            'tickangle': 45,
+        },
+        yaxis={
+            'title': {'text': 'Features', 'font': {'size': 14, 'family': 'Arial, sans-serif'}},
+            'tickfont': {'size': 12, 'family': 'Arial, sans-serif'},
+        },
         template="plotly_white",
         height=500,
         width=1600,
         margin=dict(l=100, r=100, t=100, b=100),
     )
 
-    fig.show()
-
     if save_path:
         fig.write_image(save_path)
+    return fig
 
 
 def test_correlation(
@@ -316,7 +307,7 @@ def test_correlation(
 
 def plot_coefficients(
     model: OLS, title: str = "Coefficient Estimates and Confidence Intervals"
-) -> None:
+) -> go.Figure:
     """Visualize model coefficients and their confidence intervals.
 
     This function creates a bar plot of the coefficients from a fitted OLS model,
@@ -327,7 +318,7 @@ def plot_coefficients(
         title (str, optional): The title of the plot. Defaults to "Coefficient Estimates and Confidence Intervals".
 
     Returns:
-        None
+        go.Figure: The Plotly figure object containing the bar plot.
     """
     coefficients = model.params
     conf_int = model.conf_int()
@@ -343,7 +334,8 @@ def plot_coefficients(
         title=title,
         color_discrete_sequence=[PRIMARY_COLORS[1]],
     )
-    fig.show()
+
+    return fig
 
 
 def plot_correlation(
@@ -430,7 +422,6 @@ def plot_correlation(
         width=1600,
     )
 
-    fig.show()
     if save_path:
         fig.write_image(save_path)
     return fig
@@ -515,7 +506,7 @@ def plot_model_predictions(
     y_pred: pd.Series,
     title: str,
     save_path: Optional[str] = None,
-) -> None:
+) -> go.Figure:
     """Plot residuals from model predictions.
 
     This function creates a scatter plot of the residuals (difference between actual and predicted values)
@@ -529,7 +520,7 @@ def plot_model_predictions(
         save_path (Optional[str], optional): File path to save the plot image. Defaults to None.
 
     Returns:
-        None
+        go.Figure: The Plotly figure object containing the scatter plot and trendline.
     """
     residuals = y_test - y_pred
     results_df = pd.DataFrame({"Predicted": y_pred, "Residuals": residuals}).reset_index(drop=True)
@@ -555,16 +546,14 @@ def plot_model_predictions(
             "font": {"size": 20, "family": "Arial, sans-serif"},
         },
         plot_bgcolor="white",
-        xaxis=dict(
-            title="Predicted Values",
-            titlefont=dict(size=14, family="Arial, sans-serif"),
-            tickfont=dict(size=12, family="Arial, sans-serif"),
-        ),
-        yaxis=dict(
-            title="Residuals",
-            titlefont=dict(size=14, family="Arial, sans-serif"),
-            tickfont=dict(size=12, family="Arial, sans-serif"),
-        ),
+        xaxis={
+            'title': { 'text': 'Predicted Values', 'font': {'family': 'Arial, sans-serif', 'size': 14} },
+            'tickfont': {'family': 'Arial, sans-serif', 'size': 12},
+        },
+        yaxis={
+            'title': {'text': 'Residuals', 'font': {'family': 'Arial, sans-serif', 'size': 14}},
+            'tickfont': {'family': 'Arial, sans-serif', 'size': 12}
+        },
         showlegend=False,
         height=500,
         width=1600,
@@ -573,7 +562,6 @@ def plot_model_predictions(
 
     fig.data[1].line.color = trendline_color
 
-    fig.show()
-
     if save_path:
-        pio.write_image(fig, save_path)
+        fig.write_image(save_path)
+    return fig
