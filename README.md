@@ -1,72 +1,134 @@
 # Red Wine Quality Analysis
 
-## Interactive Dashboard
+## Table of Contents
 
-To explore the data interactively with detailed charts, visit the Looker Studio dashboard:
+- [Overview](#overview)
+- [Dashboard](#dashboard)
+- [Installation](#installation)
+  - [Using uv (Recommended)](#using-uv-recommended)
+  - [Using pip (Alternative)](#using-pip-alternative)
+- [Data Analysis](#data-analysis)
+  - [Research Objectives](#research-objectives)
+  - [Hypotheses](#hypotheses)
+  - [Exploratory Data Analysis Questions](#exploratory-data-analysis-questions)
+- [Findings and Insights](#findings-and-insights)
+- [Future Improvements](#future-improvements)
+
+## Overview
+
+Red Wine Quality Analysis is a comprehensive project that explores the physicochemical properties of red wine and builds predictive models to assess quality. Leveraging Python with libraries like Pandas and Scikit-Learn, the analysis dives into key variables such as acidity, sugar, and alcohol content to uncover their relationships with wine quality.
+
+## Dashboard
+
+Explore the data interactively via our Looker Studio dashboard:
 
 [Interactive Dashboard on Looker Studio](https://lookerstudio.google.com/u/0/reporting/c4d22105-252e-422d-bb88-c76c667a7f78/page/Aa5yD)
 
-Or alternatively, on a [Personal Website](https://bunevicius.com/project-pages/red-wine-analysis)
+For additional context and resources, visit our [Project Page](https://bunevicius.com/project-pages/red-wine-analysis).
 
-## Setup Guide
+## Installation
 
-To replicate the analysis locally, follow these setup steps:
+Set up the project locally using one of the following methods:
 
-- Clone the Repository:
+### Using uv (Recommended)
 
-      git clone https://github.com/vytautas-bunevicius/red-wine-quality-analysis.git
+1. **Install uv:**
 
-- Navigate to the repository directory:
+   ```bash
+   # On Unix/macOS
+   curl -LsSf https://astral.sh/uv/install.sh | sh
 
-      cd red-wine-quality-analysis
+   # On Windows (PowerShell)
+   irm https://astral.sh/uv/install.ps1 | iex
+   ```
 
-- Install necessary Python libraries using the command:
+2. **Clone the Repository:**
 
-      pip install -r requirements.txt
+   ```bash
+   git clone https://github.com/vytautas-bunevicius/red-wine-quality-analysis.git
+   cd red-wine-quality-analysis
+   ```
 
-- Launch Jupyter Notebook to interact with the analysis:
+3. **Create and Activate a Virtual Environment:**
 
-      jupyter notebook
+   ```bash
+   uv venv
+   source .venv/bin/activate  # On Unix/macOS
+   # or
+   .venv\Scripts\activate     # On Windows
+   ```
 
-## Project Overview
+4. **Install Dependencies:**
 
-This project aims to analyze the quality of red wine using **Python** and various data analysis libraries such as **Pandas** and **Scikit-Learn**. The dataset features physicochemical properties of red wine and correlates them with sensory quality ratings.
+   ```bash
+   uv pip install -r requirements.txt
+   ```
 
-## Research Objectives
+5. **Launch Jupyter Notebook:**
 
-1. **Key Physicochemical Properties:** Explore how various properties like acidity, sugar, and alcohol content influence wine quality.
-2. **Predictive Modeling:** Develop models to predict wine quality based on its chemical properties.
-3. **Statistical Analysis:** Perform statistical tests to confirm or reject hypotheses about factors affecting wine quality.
-4. **Outlier Impact:** Assess how outliers in the data affect the overall analysis and modeling.
+   ```bash
+   jupyter notebook
+   ```
 
-## Hypotheses
+### Using pip (Alternative)
 
-a. **Null Hypothesis (H0)**: There is no significant correlation between alcohol content and the quality of red wine.
+1. **Clone the Repository:**
 
-b. **Alternative Hypothesis (H1)**: Higher alcohol content in red wine is associated with higher quality.
+   ```bash
+   git clone https://github.com/vytautas-bunevicius/red-wine-quality-analysis.git
+   cd red-wine-quality-analysis
+   ```
 
-## Exploratory Data Analysis Questions
+2. **Create and Activate a Virtual Environment:**
 
-1. What are the distributions of key physicochemical properties in the dataset?
-2. How do these properties correlate with the quality ratings of red wine?
-3. Are there identifiable trends or patterns that can help predict wine quality?
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Unix/macOS
+   # or
+   venv\Scripts\activate     # On Windows
+   ```
+
+3. **Install Dependencies:**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Launch Jupyter Notebook:**
+
+   ```bash
+   jupyter notebook
+   ```
+
+## Data Analysis
+
+### Research Objectives
+
+- **Key Physicochemical Properties:** Analyze how variables like acidity, sugar, and alcohol contribute to wine quality.
+- **Predictive Modeling:** Develop and validate statistical models to forecast wine quality.
+- **Statistical Validation:** Use hypothesis testing and correlation analysis to confirm relationships in the data.
+- **Outlier Impact:** Evaluate the effect of outliers on the analytical insights and model performance.
+
+### Hypotheses
+
+- **Null Hypothesis (H0):** There is no significant correlation between alcohol content and the quality of red wine.
+- **Alternative Hypothesis (H1):** Higher alcohol content in red wine is associated with better quality ratings.
+
+### Exploratory Data Analysis Questions
+
+1. What are the distributions of key chemical properties in the dataset?
+2. How do different physicochemical parameters correlate with the sensory quality ratings?
+3. What data patterns can be identified to reliably predict wine quality?
 
 ## Findings and Insights
 
-### 1. Distribution of Properties
-- Key physicochemical properties of wines show varied distribution patterns, often right-skewed or bimodal, indicating diverse wine characteristics.
-
-### 2. Influence on Wine Quality
-- Alcohol content and acidity levels are significant predictors of wine quality, showing strong correlations in the data analysis.
-
-### 3. Predictive Modeling of Wine Quality
-- The linear regression model used in this analysis provided an R-squared value of 35.4%, indicating a moderate level of predictability.
-
-### 4. Outliers and Their Impact
-- Identified outliers using the IQR method were initially retained to potentially uncover valuable insights but were later reevaluated for their impact on the analysis.
+- **Diverse Distributions:** Key properties display varied distributions (e.g., right-skewed, bimodal), indicating complex characteristics within the dataset.
+- **Significant Predictors:** Both alcohol content and acidity are strong predictors of the wine quality outcomes.
+- **Model Performance:** A linear regression model achieved an R-squared value of 35.4%, suggesting moderate predictability.
+- **Outlier Considerations:** Initial analyses that included outliers provided valuable insights, though subsequent adjustments improved model robustness.
 
 ## Future Improvements
 
-1. **Model Enhancements:** Explore non-linear models or machine learning techniques to improve prediction accuracy.
-2. **Data Preprocessing:** Further refine data cleaning and preprocessing to handle outliers and multicollinearity more effectively.
-3. **Extended Data Collection:** Incorporate additional data points or features to enrich the dataset and potentially uncover new insights into wine quality.
+- **Advanced Modeling:** Experiment with non-linear models and machine learning techniques to enhance prediction accuracy.
+- **Improved Data Preprocessing:** Apply more refined strategies for managing outliers and addressing multicollinearity.
+- **Dataset Expansion:** Incorporate additional features and data points to further enrich the analysis and uncover deeper insights.
