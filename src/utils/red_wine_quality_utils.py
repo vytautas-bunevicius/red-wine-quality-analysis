@@ -157,12 +157,11 @@ def plot_box_chart(
                 y=df[col],
                 name=col,
                 boxpoints="outliers",
-                fillcolor=PRIMARY_BLUE,  # main box color set to blue
-                marker=dict(color=LAVENDER),  # outlier markers set to lavender
-                line=dict(color=PRIMARY_BLUE),  # border color set to blue
+                fillcolor=PRIMARY_BLUE,
+                marker=dict(color=LAVENDER),
+                line=dict(color=PRIMARY_BLUE),
             )
         )
-    # Remove xaxis and yaxis settings from BASE_LAYOUT to avoid duplicate keyword issues
     base_layout = dict(BASE_LAYOUT)
     base_layout.pop("xaxis", None)
     base_layout.pop("yaxis", None)
@@ -301,7 +300,6 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
         )
     )
 
-    # Remove xaxis and yaxis settings from BASE_LAYOUT to avoid duplicate keyword issues
     base_layout = dict(BASE_LAYOUT)
     base_layout.pop("xaxis", None)
     base_layout.pop("yaxis", None)
@@ -327,7 +325,6 @@ def plot_heatmap(corr_matrix: pd.DataFrame, save_path: Optional[str] = None) -> 
     })
     fig.layout.update(base_layout)
 
-    # Add correlation annotations to each cell for improved readability
     for i, row in enumerate(corr_matrix.values):
         for j, val in enumerate(row):
             fig.add_annotation(
@@ -622,7 +619,6 @@ def plot_model_predictions(
 
     fig.update_traces(marker=dict(color=marker_color))
 
-    # Update layout by merging BASE_LAYOUT without xaxis and yaxis keys to avoid conflicts
     base_layout = dict(BASE_LAYOUT)
     base_layout.pop("xaxis", None)
     base_layout.pop("yaxis", None)
