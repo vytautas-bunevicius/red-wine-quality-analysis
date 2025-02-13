@@ -60,3 +60,4 @@ dmypy.json
 
 # Ignore generated egg-info files
 src/red_wine_quality_analysis.egg-info/
+red_wine_quality_analysis.egg-info/
