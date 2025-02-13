@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import pytest
 import statsmodels.api as sm
 
-import src.utils.red_wine_quality_utils as utils
+import red_wine_quality_analysis.utils.red_wine_quality_utils as utils
 
 
 @pytest.fixture
