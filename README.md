@@ -134,3 +134,7 @@ Set up the project locally using one of the following methods:
 - **Advanced Modeling:** Experiment with non-linear models and machine learning techniques to enhance prediction accuracy.
 - **Improved Data Preprocessing:** Apply more refined strategies for managing outliers and addressing multicollinearity.
 - **Dataset Expansion:** Incorporate additional features and data points to further enrich the analysis and uncover deeper insights.
+
+## License
+
+This project is licensed under the Unlicense - see the [LICENSE](LICENSE) file for details
