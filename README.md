@@ -61,7 +61,6 @@ Set up the project locally using one of the following methods:
 4. **Install Dependencies:**
 
    ```bash
-   uv pip install -r requirements.txt
    uv pip install -e .
    ```
 
@@ -92,7 +91,6 @@ Set up the project locally using one of the following methods:
 3. **Install Dependencies:**
 
    ```bash
-   pip install -r requirements.txt
    pip install -e .
    ```
 
