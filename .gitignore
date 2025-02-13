@@ -57,3 +57,6 @@ coverage.xml
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Ignore generated egg-info files
+src/red_wine_quality_analysis.egg-info/
